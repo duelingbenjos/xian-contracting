@@ -12,7 +12,7 @@ authors = [{ name = "Xian Network", email = "info@xian.org" }]
 requires-python = ">=3.14,<3.15"
 dependencies = [
     "cachetools>=7.0.6,<8",
-    "lmdb>=2.2.0,<3",
+    "lmdb>=2.2.0,<4",
     "pynacl>=1.5.0,<2",
     "xian-tech-compiler-core>=0.2.0,<0.3",
     "xian-tech-runtime-types>=0.1.5,<0.2",
