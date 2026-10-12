@@ -1,0 +1,6 @@
+# The parent library ignores lockfiles; this standalone experiment pins its environment.
+!uv.lock
+!Cargo.lock
+node_modules/
+*.sqlite
+*.sqlite-journal

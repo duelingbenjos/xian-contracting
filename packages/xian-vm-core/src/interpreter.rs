@@ -1,5 +1,5 @@
 use crate::{validate_module_ir, FunctionIr, ModuleIr};
-use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+use ed25519_dalek::{Signature, VerifyingKey};
 use num_bigint::{BigInt, Sign};
 use num_traits::{Num, Signed, ToPrimitive, Zero};
 use serde_json::{Map, Value};

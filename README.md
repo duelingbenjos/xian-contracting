@@ -131,11 +131,11 @@ print(driver.get("example.key"))
 - contract-side runtime helpers (`stdlib` bridge)
 - speculative parallel batch execution primitives
 - native zero-knowledge verifier building blocks
-- Xian VM IR generation, validation, parity fixtures, and early native VM work
+- Xian VM IR generation, validation, native execution and parity fixtures
 
 ## Validation
 
-Default CI path (pure-Python, no Rust extensions):
+Default CI path (required compiler core; optional native suites excluded):
 
 ```bash
 uv sync --group dev

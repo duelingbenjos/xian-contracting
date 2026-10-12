@@ -1,0 +1,9 @@
+{
+  "name": "xian-hybrid-auth-parity-experiment",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test verifier.test.mjs" },
+  "engines": { "node": ">=20.19.0" },
+  "dependencies": { "@noble/curves": "2.4.0", "@noble/post-quantum": "0.7.1" }
+}

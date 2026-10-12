@@ -12,7 +12,7 @@ small, purpose-built packages instead of growing one monolithic runtime.
   `xian-tech-compiler-core`
 - `xian-fastpath-core/`: optional native fast paths for transaction admission,
   published as `xian-tech-fastpath-core`
-- `xian-vm-core/`: native `xian_ir_v1` validation and early VM execution work,
+- `xian-vm-core/`: native `xian_ir_v1` validation and native VM execution,
   published as `xian-tech-vm-core`
 - `xian-zk/`: native Groth16 BN254 verification and shielded-note proving
   toolkit, published as `xian-tech-zk`

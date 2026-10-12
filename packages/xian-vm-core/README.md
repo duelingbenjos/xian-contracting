@@ -1,14 +1,15 @@
 # xian-vm-core
 
 `xian-vm-core` is the Rust-side consumer of the frozen `xian_vm_v1` compiler IR
-emitted by `xian-contracting`.
+emitted by `xian-compiler-core` through `xian-contracting`. It executes
+contract calls for `xian-abci` through the native host bridge.
 
 ```mermaid
 flowchart LR
   Source["Contract source"] --> Compiler["xian-contracting compiler"]
   Compiler --> IR["xian_vm_v1 IR"]
   IR --> Validator["Rust IR validator"]
-  Validator --> VM["Native VM execution slice"]
+  Validator --> VM["Native VM execution"]
   VM --> Host["Host storage and syscall bridge"]
   Host --> State["Deterministic state and events"]
   Fixtures["Python parity fixtures"] --> Validator
@@ -19,12 +20,12 @@ Supported scope:
 
 - deserialize the structural JSON IR
 - validate its top-level invariants and recursive node shapes
-- instantiate validated modules and execute a direct-IR interpreter slice
+- instantiate validated modules and execute the supported contract language
 - provide one Rust-owned contract for the Python frontend to target
 - expose a minimal Python-facing native capability surface for `xian-abci`
   probing via `xian_vm_core._native`
 
-Execution coverage is intentionally narrow but real:
+Supported execution includes:
 
 - local function calls and builtin calls such as `len`, `range`, `str`, and
   `isinstance`
@@ -40,7 +41,8 @@ Execution coverage is intentionally narrow but real:
   access
 - bigint-oriented builtins needed by the shielded contracts, including
   `int(..., base)`, `pow(base, exp, mod)`, and `format(value, "064x")`
-- `hashlib.sha3(...)` and `hashlib.sha256(...)`
+- explicit text/hex hashing: `hashlib.sha3_text(...)`, `sha3_hex(...)`,
+  `sha256_text(...)`, and `sha256_hex(...)`
 - `crypto.verify(...)` and `crypto.key_is_valid(...)`
 - `LogEvent` emission
 - static-import and dynamic-import contract export calls
@@ -55,7 +57,10 @@ Execution coverage is intentionally narrow but real:
 - host-delegated `zk.*` syscalls, which remain explicit runtime boundary calls
   instead of Rust-local protocol logic
 
-It is a bounded execution slice, not the full executor.
+The node owns transaction authorization, nonce handling and account-registry
+transitions. `crypto.verify` inside contracts is raw Ed25519 verification and
+does not resolve current hybrid account authority; use authenticated callers
+for account permissions.
 
 The crate includes curated conformance fixtures generated from the current local
 harness. Those fixtures are checked from Rust so the VM can match actual
@@ -88,8 +93,6 @@ Metering covers both host-side data costs and VM execution:
 - the Python deployment path and offline tooling keep canonical
   source-to-runtime recompilation in the Python artifact validator; the native
   path is Rust-native for bundle validation, not a Rust recompiler
-- the five-node `make localnet-parallel-e2e` native-authority soak passes end to
-  end, including shielded token flows and parallel prefix-scan access patterns
 
 That parity corpus covers:
 
@@ -110,25 +113,18 @@ That parity corpus covers:
   `reflection_token.transfer(...)`, `profile_registry.create_channel(...)`,
   `turn_based_games.join_match(...)`, and `oracle.price_info(...)`
 
-The intent is to keep the Xian VM implementation Rust-first for performance,
-while still freezing semantics in the Python compiler frontend before runtime
-execution work starts.
+## Python integration
 
-The crate ships a small PyO3/maturin surface for integration work:
+The PyO3/maturin binding exposes:
 
-- `runtime_info()` / `runtime_info_json()`
-- `supports_execution_policy(...)`
-- `validate_module_ir(...)` / `validate_module_ir_json(...)`
+- `runtime_info_json()` and `supports_execution_policy(...)`
+- `validate_module_ir_json(...)`
+- `validate_deployment_artifacts_json(...)`
+- `execute_bundle(...)` with explicit context, host, transaction size and meter
 
-That surface is intentionally narrow. It is there so node-side code can probe
-the VM runtime honestly before transaction execution is wired through the Rust
-engine.
-
-The largest remaining runtime work is metering drift on the heaviest authored
-flows and the host-operation split between delegated calls and Rust-owned
-implementations. Integer width, basic authored shielded execution, and
-pre-call setup flows are covered by the authored parity corpus and fixture
-generator.
+Execution returns state changes, events, result/status and chi accounting.
+The host supplies deterministic chain context and storage; consensus processing
+commits the accepted results.
 
 ## Releases
 

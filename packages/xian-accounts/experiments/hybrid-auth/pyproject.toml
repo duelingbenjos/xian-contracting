@@ -1,0 +1,17 @@
+[project]
+name = "xian-hybrid-auth-experiment"
+version = "0.0.0"
+description = "Local-only hybrid authorization experiment; not a transaction scheme"
+requires-python = ">=3.14"
+dependencies = ["pqcrypto==0.4.0", "pynacl==1.6.0"]
+
+[dependency-groups]
+dev = ["pytest==9.0.3", "hypothesis==6.152.3"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "-ra"
+norecursedirs = [".*", "build", "dist", "node_modules", "target"]

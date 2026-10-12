@@ -1,4 +1,4 @@
-use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+use ed25519_dalek::{Signature, VerifyingKey};
 use pyo3::create_exception;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -269,7 +269,9 @@ fn verify_signature(public_key_hex: &str, signature_hex: &str, message: &str) ->
         Err(_) => return false,
     };
     let signature = Signature::from_bytes(&signature_bytes);
-    verifying_key.verify(message.as_bytes(), &signature).is_ok()
+    verifying_key
+        .verify_strict(message.as_bytes(), &signature)
+        .is_ok()
 }
 
 fn ensure_exact_keys(map: &Map<String, Value>, expected: &[&str]) -> PyResult<()> {

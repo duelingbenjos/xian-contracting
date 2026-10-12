@@ -1,0 +1,154 @@
+{
+  "created_utc": "2026-10-11T15:41:39.753084+00:00",
+  "host": {
+    "os": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "cpu": "Apple M1",
+    "python": "3.14.8"
+  },
+  "libraries": {
+    "pqcrypto": "0.4.0",
+    "pynacl": "1.6.0"
+  },
+  "scope": "single-process local microbenchmark; no network, JSON/hex encoding or state lookup",
+  "sizes_bytes": {
+    "ed25519_signature": 64,
+    "ml_dsa_65_signature": 3309,
+    "authorization_envelope": 3400,
+    "authorization_hex_characters": 6800,
+    "registry_public_keys": 1984,
+    "private_keys": 4064
+  },
+  "key_generation": {
+    "samples": 50,
+    "median_ms": 0.284751,
+    "p95_ms": 0.301208
+  },
+  "payloads": {
+    "256": {
+      "ed25519_sign_payload": {
+        "samples": 500,
+        "median_ms": 0.064917,
+        "p95_ms": 0.066875
+      },
+      "ed25519_verify_payload": {
+        "samples": 500,
+        "median_ms": 0.14375,
+        "p95_ms": 0.147916
+      },
+      "hybrid_sign_including_self_check": {
+        "samples": 500,
+        "median_ms": 0.760104,
+        "p95_ms": 1.284958
+      },
+      "hybrid_verify_valid": {
+        "samples": 500,
+        "median_ms": 0.278729,
+        "p95_ms": 0.31125
+      },
+      "hybrid_verify_invalid_ed": {
+        "samples": 500,
+        "median_ms": 0.002791,
+        "p95_ms": 0.002834
+      },
+      "hybrid_verify_invalid_ed_equation": {
+        "samples": 500,
+        "median_ms": 0.16848,
+        "p95_ms": 0.184959
+      },
+      "hybrid_verify_invalid_pq": {
+        "samples": 500,
+        "median_ms": 0.276458,
+        "p95_ms": 0.297833
+      },
+      "hybrid_reject_wrong_size": {
+        "samples": 500,
+        "median_ms": 0.00025,
+        "p95_ms": 0.000292
+      }
+    },
+    "4096": {
+      "ed25519_sign_payload": {
+        "samples": 500,
+        "median_ms": 0.161291,
+        "p95_ms": 0.202792
+      },
+      "ed25519_verify_payload": {
+        "samples": 500,
+        "median_ms": 0.196063,
+        "p95_ms": 0.352041
+      },
+      "hybrid_sign_including_self_check": {
+        "samples": 500,
+        "median_ms": 0.928938,
+        "p95_ms": 1.466333
+      },
+      "hybrid_verify_valid": {
+        "samples": 500,
+        "median_ms": 0.333,
+        "p95_ms": 0.351875
+      },
+      "hybrid_verify_invalid_ed": {
+        "samples": 500,
+        "median_ms": 0.002834,
+        "p95_ms": 0.002917
+      },
+      "hybrid_verify_invalid_ed_equation": {
+        "samples": 500,
+        "median_ms": 0.210041,
+        "p95_ms": 0.217833
+      },
+      "hybrid_verify_invalid_pq": {
+        "samples": 500,
+        "median_ms": 0.332791,
+        "p95_ms": 0.337916
+      },
+      "hybrid_reject_wrong_size": {
+        "samples": 500,
+        "median_ms": 0.000208,
+        "p95_ms": 0.00025
+      }
+    },
+    "131072": {
+      "ed25519_sign_payload": {
+        "samples": 500,
+        "median_ms": 2.974979,
+        "p95_ms": 3.05125
+      },
+      "ed25519_verify_payload": {
+        "samples": 500,
+        "median_ms": 1.605229,
+        "p95_ms": 1.668666
+      },
+      "hybrid_sign_including_self_check": {
+        "samples": 500,
+        "median_ms": 6.121604,
+        "p95_ms": 6.640958
+      },
+      "hybrid_verify_valid": {
+        "samples": 500,
+        "median_ms": 2.219291,
+        "p95_ms": 2.320667
+      },
+      "hybrid_verify_invalid_ed": {
+        "samples": 500,
+        "median_ms": 0.011605,
+        "p95_ms": 0.012584
+      },
+      "hybrid_verify_invalid_ed_equation": {
+        "samples": 500,
+        "median_ms": 1.625376,
+        "p95_ms": 1.717792
+      },
+      "hybrid_verify_invalid_pq": {
+        "samples": 500,
+        "median_ms": 2.219104,
+        "p95_ms": 2.285708
+      },
+      "hybrid_reject_wrong_size": {
+        "samples": 500,
+        "median_ms": 0.000208,
+        "p95_ms": 0.00025
+      }
+    }
+  }
+}
