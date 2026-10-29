@@ -582,6 +582,20 @@ def execute_contract(
             "xian_vm_v1 requires persisted __xian_ir_v1__ for contract "
             f"'{contract_name}'; stored source is inspection-only"
         )
+    # A contract with an owner may only be called by that owner, whether the
+    # call comes from another contract or straight from a transaction.
+    owner = host.get_owner(contract_name)
+    if owner is not None and owner != (context or {}).get("caller"):
+        return NativeExecutionResult(
+            status_code=1,
+            result=_coerce_native_error_result(1, 'Exception("Caller is not the owner!")'),
+            writes={},
+            events=[],
+            snapshots=[],
+            raw_cost=0,
+            chi_used=constants.TRANSACTION_BASE_CHI,
+            contract_costs={},
+        )
     bundle_payload = {contract_name: module_ir}
     previous_env = dict(rt.env)
     rt.env = {**previous_env, **dict(context or {}), "__Driver": driver}
