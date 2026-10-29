@@ -66,6 +66,13 @@ mod support;
 use crate::values::*;
 use support::*;
 
+const SUBMISSION_CONTRACT: &str = "submission";
+const SUBMISSION_ONLY_SYSCALLS: [&str; 3] = [
+    "contract.deploy",
+    "contract.set_owner",
+    "contract.set_developer",
+];
+
 fn vm_trace_enabled(flag: &str) -> bool {
     env::var_os(flag).is_some()
 }
@@ -2532,6 +2539,17 @@ impl VmInstance {
                 Ok(VmValue::None)
             }
             other => {
+                // Contract metadata syscalls are checked against the contract
+                // executing right now, not the transaction's entry contract,
+                // so a constructor or a contract called from submission can't
+                // use them.
+                if SUBMISSION_ONLY_SYSCALLS.contains(&other)
+                    && self.context.this.as_deref() != Some(SUBMISSION_CONTRACT)
+                {
+                    return Err(VmExecutionError::new(
+                        "Contract metadata changes are restricted to submission.",
+                    ));
+                }
                 if let Some(cost) = explicit_syscall_metering_cost(other, &args, &kwargs)? {
                     host.charge_execution_cost(cost)?;
                 }
