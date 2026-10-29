@@ -92,6 +92,7 @@ class NativeVmHost:
         vm_profile: str = "xian_vm_v1",
         entry_contract: str | None = None,
         meter_enabled: bool = False,
+        chi_budget_raw: int = 0,
         context: dict[str, Any] | None = None,
     ) -> None:
         self.driver = driver
@@ -100,6 +101,7 @@ class NativeVmHost:
         self._parsed_ir_cache: dict[str, dict[str, Any]] = {}
         self._entry_contract = entry_contract
         self._meter_enabled = meter_enabled
+        self._chi_budget_raw = max(int(chi_budget_raw), 0)
         self._context = dict(context or {})
         self._pending_writes: dict[str, Any] = {}
         self._pending_events: list[dict[str, Any]] = []
@@ -405,7 +407,9 @@ class NativeVmHost:
                     constructor_context,
                     self,
                     meter=self._meter_enabled,
-                    chi_budget_raw=0,
+                    # A constructor is bounded by the deploying transaction's
+                    # budget rather than running unbudgeted.
+                    chi_budget_raw=self._chi_budget_raw,
                     transaction_size_bytes=0,
                 )
                 if int(raw["status_code"]) != 0:
@@ -574,6 +578,7 @@ def execute_contract(
         driver,
         entry_contract=contract_name,
         meter_enabled=meter,
+        chi_budget_raw=chi_budget_raw,
         context=dict(context or {}),
     )
     module_ir = host.load_module_ir(contract_name)

@@ -218,10 +218,20 @@ impl VmMeter {
             .raw_cost
             .checked_add(cost)
             .ok_or_else(|| VmExecutionError::new("chi metering overflow"))?;
-        if self.chi_budget_raw > 0 && self.raw_cost > self.chi_budget_raw {
+        if self.raw_cost > self.effective_budget_raw() {
             return Err(VmExecutionError::new("Out of chi."));
         }
         Ok(())
+    }
+
+    /// Metered execution is always bounded: a budget of 0 means the VM-wide
+    /// maximum, never "unlimited".
+    fn effective_budget_raw(&self) -> u64 {
+        if self.chi_budget_raw > 0 {
+            self.chi_budget_raw.min(VM_MAX_RAW_CHI)
+        } else {
+            VM_MAX_RAW_CHI
+        }
     }
 
     fn finalize_contract_meter_frame(&mut self) {
@@ -386,7 +396,7 @@ fn python_timedelta_parts(raw_seconds: i64) -> (i64, i64) {
 mod tests {
     use super::{
         VmMeter, VmMeterConfig, VM_GAS_CROSS_CONTRACT_CALL_BASE, VM_GAS_CROSS_CONTRACT_CALL_REPEAT,
-        VM_TRANSACTION_BASE_CHI, VM_TRANSACTION_BASE_CHI_RAW,
+        VM_MAX_RAW_CHI, VM_TRANSACTION_BASE_CHI, VM_TRANSACTION_BASE_CHI_RAW,
     };
 
     #[test]
@@ -410,6 +420,41 @@ mod tests {
             stats.contract_costs.get("currency"),
             Some(&VM_TRANSACTION_BASE_CHI_RAW)
         );
+    }
+
+    #[test]
+    fn zero_budget_is_capped_at_the_vm_maximum() {
+        let mut meter = VmMeter::new(VmMeterConfig {
+            enabled: true,
+            chi_budget_raw: 0,
+            transaction_size_bytes: 0,
+        });
+
+        assert!(meter.charge(VM_MAX_RAW_CHI).is_ok());
+        assert!(meter.charge(1).is_err());
+    }
+
+    #[test]
+    fn budget_above_the_vm_maximum_is_capped() {
+        let mut meter = VmMeter::new(VmMeterConfig {
+            enabled: true,
+            chi_budget_raw: VM_MAX_RAW_CHI * 2,
+            transaction_size_bytes: 0,
+        });
+
+        assert!(meter.charge(VM_MAX_RAW_CHI + 1).is_err());
+    }
+
+    #[test]
+    fn positive_budget_still_limits_execution() {
+        let mut meter = VmMeter::new(VmMeterConfig {
+            enabled: true,
+            chi_budget_raw: 25_000,
+            transaction_size_bytes: 0,
+        });
+
+        assert!(meter.charge(25_000).is_ok());
+        assert!(meter.charge(1).is_err());
     }
 
     #[test]
